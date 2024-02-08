@@ -31,7 +31,7 @@ meta3 <- pcts2 %>%
   mutate(Outcome = ifelse(Outcome == "NS", 1, 0)) # Assuming NS=Non-survivor as positive class
 
 # ROC Curve Analysis
-setwd("/bigdata/godziklab/shared/Xinru/302005/22-10/")
+setwd("~/Platelet_project")
 pdf("ROC_platelet-cluster_ratio.pdf", height = 8, width = 8)
 mycol <- c("#007b00", "#24e0b8", "#ffcc51", "#ff8b76", "#ff3031", "#ff6600", "#f5de2e", "#d00e80", "#f673f5", "#8fce00", "#ff6600", "#f5de2e", "#d00e80")
 
