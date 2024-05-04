@@ -49,7 +49,6 @@ for (i in seq_along(cell_types)) {
   stat.test <- stat.test %>% filter(p.adj.signif != "ns")
   meta_category$Severity <- factor(meta_category$Severity,
                                    levels = c("HC", "CV", "ML", "MD", "SV", "FT", "SLE"))
-  setwd("<path_to_save_plots>")  # Replace with a generic path or a specific path as needed
   dpi = 300
   png(file = paste0(cell_types[i], "_Severity.png"), 
       width = dpi * 4, height = dpi * 4, units = "px", res = dpi, type = 'cairo')
