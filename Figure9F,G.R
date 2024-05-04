@@ -13,7 +13,7 @@ names(df)[names(df) == "T.cell.differentiation1"] <- "T.cell.differentiation"
 names(df)[names(df) == "B.cell.proliferation1"] <- "B.cell.proliferation"
 df$Outcome <- ifelse(df$Outcome == "NS", "FT", df$Outcome)
 df$Outcome <- factor(df$Outcome,
-                     levels = c("HC", "S", "FT", "Unknown"))
+                     levels = c("Unknown", "HC", "S", "FT"))
 # Define modules to analyze
 modules <- c("T.cell.differentiation", "B.cell.proliferation")
 
