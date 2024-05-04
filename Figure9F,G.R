@@ -5,43 +5,52 @@ library(ggpubr)
 library(rstatix)
 library(ggplot2)
 
-
-
 # Load dataset
-df_viz <- readRDS('Module_meta_4.rds')
+df <- readRDS('Module_meta_4.rds')
 
+names(df)[names(df) == "Outcome"] <- "Outcome"
+names(df)[names(df) == "T.cell.differentiation1"] <- "T.cell.differentiation"
+names(df)[names(df) == "B.cell.proliferation1"] <- "B.cell.proliferation"
+df$Outcome <- ifelse(df$Outcome == "NS", "FT", df$Outcome)
+df$Outcome <- factor(df$Outcome,
+                     levels = c("HC", "S", "FT", "Unknown"))
 # Define modules to analyze
 modules <- c("T.cell.differentiation", "B.cell.proliferation")
 
-# Function to generate plots for each module
-generate_module_plots <- function(module_name) {
-  message("Processing module: ", module_name)
-  
-  df_filtered <- df_viz %>%
-    select(Outcome, all_of(module_name)) %>%
-    filter(!is.na(Outcome)) %>%
-    mutate(Score = as.numeric(.data[[module_name]]),
-           Outcome = factor(Outcome, levels = c("Unknown", "HC", "S", "NS")))
-  
-  # Perform statistical test
-  stat.test <- df_filtered %>%
-    wilcox_test(Score ~ Outcome) %>%
-    add_xy_position(fun = "max", x = "Outcome") %>%
+for (i in 1: length(modules)){
+  module_name = modules[i]
+  print(module_name)
+  df1 <-df %>%
+    dplyr::select(Outcome,modules[i]) %>%
+    dplyr::filter(!is.na(Outcome))
+  df1[,2]<- as.numeric(df1[,2])
+  names(df1) <- c("Outcome", "Module")
+  stat.test <- df1 %>% wilcox_test(Module ~ Outcome)
+  stat.test <- stat.test %>%
+    add_xy_position(fun = "max",x = "Outcome") %>%
     filter(p.adj.signif != "ns")
-  
-  # Generate plot
-  plot_path <- sprintf("/%s_Outcome_module.png", module_name)
-  png(plot_path, width = 300 * 4, height = 300 * 4, units = "px", res = 300, type = 'cairo')
-  ggbarplot(df_filtered,
-            x = "Outcome", y = "Score", fill = "Outcome",
-            palette = c('#FFBE7A', '#8ECFC9', '#82B0D2', '#FA7F6F'),
-            add = "mean_se") +
-    stat_pvalue_manual(stat.test, y.position = 0.03, step.increase = 0.01, tip.length = 0.005, label = "p.adj.signif") +
-    theme_minimal(base_size = 11) +
-    ggtitle(module_name) +
-    theme(legend.position = "none")
+  dpi = 300
+  png(file = paste0(module_name,"_Outcome_module.png"),
+      width = dpi * 4,height = dpi * 4,
+      units = "px",res = dpi,type = 'cairo')
+  print(ggbarplot(df1,
+                  x = "Outcome",
+                  y =  "Module",
+                  fill = "Outcome",
+                  palette = c('#FFD16F', '#A1CEED', '#456681', '#ad3c53'),
+                  add = c("mean_se")) +
+          theme(plot.title = element_text(size=10)) +
+          
+          # stat_pvalue_manual(stat.test,
+          #                    y.position = 0.5,
+          #                    step.increase = 0.05,
+          #                    tip.length = 0.01,
+          #                    label = "p.adj.signif") +
+          theme_minimal() +
+          ggtitle(module_name) +
+          theme(legend.position = "none")+
+          theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1))
+  )
   dev.off()
 }
 
-# Apply function to each module
-lapply(modules, generate_module_plots)
