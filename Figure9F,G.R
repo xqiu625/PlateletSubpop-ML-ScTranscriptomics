@@ -8,10 +8,6 @@ library(ggplot2)
 # Load dataset
 df <- readRDS('Module_meta_4.rds')
 
-names(df)[names(df) == "Outcome"] <- "Outcome"
-names(df)[names(df) == "T.cell.differentiation1"] <- "T.cell.differentiation"
-names(df)[names(df) == "B.cell.proliferation1"] <- "B.cell.proliferation"
-df$Outcome <- ifelse(df$Outcome == "NS", "FT", df$Outcome)
 df$Outcome <- factor(df$Outcome,
                      levels = c("Unknown", "HC", "S", "FT"))
 # Define modules to analyze
@@ -24,8 +20,8 @@ for (i in 1: length(modules)){
     dplyr::select(Outcome,modules[i]) %>%
     dplyr::filter(!is.na(Outcome))
   df1[,2]<- as.numeric(df1[,2])
-  names(df1) <- c("Outcome", "Module")
-  stat.test <- df1 %>% wilcox_test(Module ~ Outcome)
+  names(df1) <- c("Outcome", "Score")
+  stat.test <- df1 %>% wilcox_test(Score ~ Outcome)
   stat.test <- stat.test %>%
     add_xy_position(fun = "max",x = "Outcome") %>%
     filter(p.adj.signif != "ns")
@@ -35,7 +31,7 @@ for (i in 1: length(modules)){
       units = "px",res = dpi,type = 'cairo')
   print(ggbarplot(df1,
                   x = "Outcome",
-                  y =  "Module",
+                  y =  "Score",
                   fill = "Outcome",
                   palette = c('#FFD16F', '#A1CEED', '#456681', '#ad3c53'),
                   add = c("mean_se")) +
@@ -48,9 +44,8 @@ for (i in 1: length(modules)){
           #                    label = "p.adj.signif") +
           theme_minimal() +
           ggtitle(module_name) +
-          theme(legend.position = "none")+
-          theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1))
+          theme(legend.position = "none") +
+          theme_minimal(base_size = 11)
   )
   dev.off()
 }
-
