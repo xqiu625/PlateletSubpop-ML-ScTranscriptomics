@@ -22,7 +22,7 @@ generate_plot <- function(module_name) {
   
   p <- ggbarplot(df,
                  x = "Severity", y = "Score", fill = "Severity",
-                 palette = c('#fee5d9','#fcbba','#fc9272','#fb6a4a','#de2d26','#a50f5', '#bdbdbd'),
+                 palette = c('#fee5d9','#fcbba1','#fc9272','#fb6a4a','#de2d26','#a50f15', '#bdbdbd'),
                  add = c("mean_se")) +
     stat_pvalue_manual(stat.test, y.position = 0.05, step.increase = 0.0, tip.length = 0.005, label = "p.adj.signif") +
     theme_minimal(base_size = ) +
