@@ -7,8 +7,6 @@ This repository contains the analysis code for the paper "Deciphering Abnormal P
 
 ## Overview
 
-**Published in the International Journal of Molecular Sciences**
-
 ![Platelet Subpopulations](https://github.com/xqiu625/PlateletSubpop-ML-ScTranscriptomics/assets/26670165/14ac3d98-7811-4b37-a2a7-f0b1037697de)
 
 ### Key Findings:
