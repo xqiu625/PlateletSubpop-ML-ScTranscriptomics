@@ -5,7 +5,7 @@
 This repository contains the analysis code for the paper "Deciphering Abnormal Platelet Subpopulations in COVID-19, Sepsis, and Systemic Lupus Erythematosus through Machine Learning and Single-Cell Transcriptomics" (Qiu et al., 2021, Journal of Leukocyte Biology).
 
 
-## [Deciphering Abnormal Platelet Subpopulations in COVID-19, Sepsis, and Systemic Lupus Erythematosus through Machine Learning and Single-Cell Transcriptomics](https://www.mdpi.com/1422-0067/25/11/5941#B44-ijms-25-05941)
+## Overview
 
 **Published in the International Journal of Molecular Sciences**
 
