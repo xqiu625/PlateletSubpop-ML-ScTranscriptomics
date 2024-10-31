@@ -1,4 +1,9 @@
 # PlateletSubpop-ML-ScTranscriptomics
+[![DOI](https://zenodo.org/badge/DOI/10.3390/ijms25115941.svg)](https://doi.org/10.3390/ijms25115941)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+This repository contains the analysis code for the paper "Deciphering Abnormal Platelet Subpopulations in COVID-19, Sepsis, and Systemic Lupus Erythematosus through Machine Learning and Single-Cell Transcriptomics" (Qiu et al., 2021, Journal of Leukocyte Biology).
+
 
 ## [Deciphering Abnormal Platelet Subpopulations in COVID-19, Sepsis, and Systemic Lupus Erythematosus through Machine Learning and Single-Cell Transcriptomics](https://www.mdpi.com/1422-0067/25/11/5941#B44-ijms-25-05941)
 
