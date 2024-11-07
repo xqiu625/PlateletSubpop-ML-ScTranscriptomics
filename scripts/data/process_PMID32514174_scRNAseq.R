@@ -128,15 +128,15 @@ subset_cell_types <- function(seurat_obj) {
 analyze_cell_counts <- function(cell_subsets) {
   cell_counts <- lapply(names(cell_subsets), function(type) {
     FetchData(cell_subsets[[type]], 
-             vars = c("Data_NO", "Data_ID", "Donor.full", "Disease", 
+             vars = c ("Data_ID", "Donor.full", "Disease", 
                      "Disease_group", "Cell_type")) %>%
-      group_by(Data_NO, Data_ID, Donor.full, Disease, Disease_group, Cell_type) %>%
+      group_by(Data_ID, Donor.full, Disease, Disease_group, Cell_type) %>%
       count() %>%
       spread(Cell_type, n)
   })
   
   # Combine all cell counts
-  combined_counts <- reduce(cell_counts, full_join, by = c("Data_NO", "Data_ID", 
+  combined_counts <- reduce(cell_counts, full_join, by = c ("Data_ID", 
                                                           "Donor.full", "Disease", 
                                                           "Disease_group"))
   
