@@ -152,20 +152,20 @@ analyze_cell_counts <- function(cell_subsets) {
   # Process each cell type
   cell_counts <- map(names(cell_subsets), function(type) {
     FetchData(cell_subsets[[type]], 
-             vars = c("Data_NO", "Data_ID", "sample", "Disease", 
+             vars = c("Data_ID", "sample", "Disease", 
                      "Disease_group", "Cell_type")) %>%
-      group_by(Data_NO, Data_ID, sample, Disease, Disease_group, Cell_type) %>%
+      group_by(Data_ID, sample, Disease, Disease_group, Cell_type) %>%
       count() %>%
       spread(Cell_type, n)
   })
   
   # Combine counts and calculate percentages
   counts_combined <- reduce(cell_counts, full_join, 
-                          by = c("Data_NO", "Data_ID", "sample", 
+                          by = c("Data_ID", "sample", 
                                 "Disease", "Disease_group")) %>%
     replace(is.na(.), 0)
   
-  total_cells <- select(counts_combined, -c(Data_NO:Disease_group)) %>%
+  total_cells <- select(counts_combined, -c(Data_ID:Disease_group)) %>%
     rowSums()
   
   percentages <- counts_combined %>%
