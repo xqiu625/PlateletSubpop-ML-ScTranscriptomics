@@ -21,9 +21,9 @@ suppressPackageMessages({
 })
 
 # Set paths
-BASE_DIR <- "/bigdata/godziklab/shared/Xinru/302005/datasets"
+BASE_DIR <- "/datasets"
 OUTPUT_DIR <- file.path(BASE_DIR, "PMID32810438")
-R_LIB_PATH <- "/bigdata/godziklab/shared/Xinru/R"
+R_LIB_PATH <- "/R"
 
 # Add custom R library path
 .libPaths(c(R_LIB_PATH, .libPaths()))
