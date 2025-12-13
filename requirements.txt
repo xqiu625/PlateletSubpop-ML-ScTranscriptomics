@@ -1,0 +1,114 @@
+# R Package Dependencies for PlateletSubpop-ML-ScTranscriptomics
+# Tested with R version >= 4.2.0
+
+# ============================================
+# Core Single-Cell Analysis
+# ============================================
+Seurat>=4.0.0
+SeuratDisk
+SeuratObject
+harmony
+SingleR
+celldex
+scCATCH
+SingleCellExperiment
+scater
+monocle3
+MAST
+sctransform
+
+# ============================================
+# Machine Learning
+# ============================================
+keras
+tensorflow
+reticulate
+xgboost
+caret
+
+# ============================================
+# Data Processing & Manipulation
+# ============================================
+tidyverse       # includes: dplyr, tidyr, readr, ggplot2, purrr, stringr, forcats, tibble
+Matrix
+Matrix.utils
+
+# ============================================
+# Gene Annotation & Pathway Analysis
+# ============================================
+org.Hs.eg.db
+GO.db
+KEGGREST
+HGNChelper
+clusterProfiler
+enrichplot
+DOSE
+AnnotationHub
+nichenetr
+GSVA
+GSEABase
+limma
+MeSHDbi
+meshes
+
+# ============================================
+# Visualization
+# ============================================
+ggplot2
+cowplot
+ggpubr
+pheatmap
+ComplexHeatmap
+RColorBrewer
+circlize
+VennDiagram
+EnhancedVolcano
+ggnewscale
+ggupset
+viridis
+Cairo
+reshape2
+
+# ============================================
+# Statistical Analysis
+# ============================================
+rstatix
+ROCR
+pROC
+
+# ============================================
+# Utilities
+# ============================================
+EpicTools
+
+# ============================================
+# Installation Instructions
+# ============================================
+#
+# CRAN packages:
+# install.packages(c("tidyverse", "Matrix", "xgboost", "caret", "keras",
+#                    "reticulate", "cowplot", "ggpubr", "pheatmap",
+#                    "RColorBrewer", "VennDiagram", "viridis", "Cairo",
+#                    "reshape2", "rstatix", "ROCR", "pROC", "HGNChelper"))
+#
+# Bioconductor packages:
+# if (!require("BiocManager", quietly = TRUE))
+#     install.packages("BiocManager")
+# BiocManager::install(c("Seurat", "SeuratDisk", "harmony", "SingleR",
+#                        "celldex", "scCATCH", "SingleCellExperiment",
+#                        "scater", "monocle3", "MAST", "sctransform",
+#                        "org.Hs.eg.db", "GO.db", "KEGGREST",
+#                        "clusterProfiler", "enrichplot", "DOSE",
+#                        "AnnotationHub", "GSVA", "GSEABase", "limma",
+#                        "ComplexHeatmap", "circlize", "EnhancedVolcano",
+#                        "ggnewscale", "ggupset", "MeSHDbi", "meshes"))
+#
+# GitHub packages:
+# devtools::install_github("satijalab/seurat-data")
+# devtools::install_github("saeyslab/nichenetr")
+#
+# TensorFlow/Keras setup:
+# library(reticulate)
+# install_tensorflow()
+# library(keras)
+# install_keras()
