@@ -8,9 +8,7 @@ This repository contains the analysis code for the paper **"Deciphering Abnormal
 
 ## Overview
 
-![Platelet Subpopulations](https://github.com/xqiu625/PlateletSubpop-ML-ScTranscriptomics/assets/26670165/14ac3d98-7811-4b37-a2a7-f0b10376![PlateletSubpop-ML-ScTranscriptomics-overview](https://github.com/user-attachments/assets/429c961d-4826-4edd-8336-1b9c11258e1e)
-97de)
-
+![Platelet Subpopulations](PlateletSubpop-ML-ScTranscriptomics-overview.jpeg)
 ### Key Findings
 
 - **Platelet to T Cell Ratio as a Prognostic Biomarker**: The proportion of platelets to T cells in peripheral blood mononuclear cells (PBMC) was identified as the most potent predictor for distinguishing survivors from fatal patients.
