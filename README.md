@@ -8,7 +8,8 @@ This repository contains the analysis code for the paper **"Deciphering Abnormal
 
 ## Overview
 
-![Platelet Subpopulations](https://github.com/xqiu625/PlateletSubpop-ML-ScTranscriptomics/assets/26670165/14ac3d98-7811-4b37-a2a7-f0b1037697de)
+![Platelet Subpopulations](https://github.com/xqiu625/PlateletSubpop-ML-ScTranscriptomics/assets/26670165/14ac3d98-7811-4b37-a2a7-f0b10376![PlateletSubpop-ML-ScTranscriptomics-overview](https://github.com/user-attachments/assets/429c961d-4826-4edd-8336-1b9c11258e1e)
+97de)
 
 ### Key Findings
 
