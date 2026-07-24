@@ -31,19 +31,19 @@ The computational core of the study: integrate **12 public scRNA-seq cohorts** i
 
 Twelve datasets introduce severe batch effects. Let $\mathbf{z}_i \in \mathbb{R}^{d}$ be the PCA embedding of cell $i$ and $\phi_i$ its one-hot batch indicator. Harmony alternates between **soft $k$-means clustering** and **mixture-of-experts batch correction**. Cells are assigned to centroids $\{Y_k\}$ with responsibility
 
-$$R_{ki} = \frac{\exp\!\left(-d(\mathbf{z}_i, Y_k)/\sigma\right)}{\sum_{k'}\exp\!\left(-d(\mathbf{z}_i, Y_{k'})/\sigma\right)},$$
+$$R_{ki} = \frac{\exp\left(-d(\mathbf{z}_i, Y_k)/\sigma\right)}{\sum_{k'}\exp\left(-d(\mathbf{z}_i, Y_{k'})/\sigma\right)},$$
 
 and each centroid learns a batch-specific correction $W_k \in \mathbb{R}^{B \times d}$ by ridge regression of $\mathbf{z}_i - Y_k$ onto $\phi_i$ with penalty $\lambda \lVert W_k\rVert^2$. The diversity objective penalizes batch-poor clusters,
 
-$$\max_{\theta}\ \sum_{i,k} R_{ki}\, \phi_i^{\top} \theta_k \quad \text{s.t. cluster entropy regularization},$$
+$$\max_{\theta}\ \sum_{i,k} R_{ki}\  \phi_i^{\top} \theta_k \quad \text{s.t. cluster entropy regularization},$$
 
-yielding corrected embeddings $\hat{\mathbf{z}}_i = \mathbf{z}_i - \sum_k R_{ki}\, \phi_i^{\top} W_k$ in which biological, not technical, variation dominates.
+yielding corrected embeddings $\hat{\mathbf{z}}_i = \mathbf{z}_i - \sum_k R_{ki}\  \phi_i^{\top} W_k$ in which biological, not technical, variation dominates.
 
 ### 2. Outcome Prediction with XGBoost
 
 Prediction of patient outcome (survivor vs. fatal) is posed as additive function estimation $\hat{y}_i = \sum_{t=1}^{T} f_t(\mathbf{x}_i)$, $f_t \in \mathcal{F}$ (CART space), minimizing the regularized objective
 
-$$\mathcal{L} = \sum_{i=1}^{n} \ell\!\left(y_i, \hat{y}_i\right) + \sum_{t=1}^{T} \Omega(f_t), \qquad \Omega(f) = \gamma T + \frac{1}{2}\lambda \lVert \mathbf{w} \rVert^2.$$
+$$\mathcal{L} = \sum_{i=1}^{n} \ell\left(y_i, \hat{y}_i\right) + \sum_{t=1}^{T} \Omega(f_t), \qquad \Omega(f) = \gamma T + \frac{1}{2}\lambda \lVert \mathbf{w} \rVert^2.$$
 
 Each boosting round optimizes a second-order Taylor approximation with gradient/Hessian statistics $g_i = \partial_{\hat{y}}\ell$, $h_i = \partial^2_{\hat{y}}\ell$:
 
@@ -65,7 +65,7 @@ with gradients $\partial \mathcal{L} / \partial \mathbf{o}_i = \hat{\mathbf{p}}_
 
 Gene-wise differential expression uses a two-part generalized linear **hurdle model**. For gene $g$ in cell $i$ with (log-transformed) expression $y_{ig}$, let $z_{ig} = \mathbb{1}[y_{ig} > 0]$ indicate detection:
 
-$$\operatorname{logit} P(z_{ig} = 1) = \mathbf{x}_i^{\top}\boldsymbol{\beta}_g^{c}, \qquad y_{ig} \mid (z_{ig} = 1) \sim \mathcal{N}\!\left(\mathbf{x}_i^{\top}\boldsymbol{\beta}_g^{g},\ \sigma_g^2\right).$$
+$$\mathrm{logit} P(z_{ig} = 1) = \mathbf{x}_i^{\top}\boldsymbol{\beta}_g^{c}, \qquad y_{ig} \mid (z_{ig} = 1) \sim \mathcal{N}\left(\mathbf{x}_i^{\top}\boldsymbol{\beta}_g^{g},\ \sigma_g^2\right).$$
 
 The discrete part models dropout frequency; the continuous part models positive expression level. Wald tests on $\boldsymbol{\beta}^g$ and $\boldsymbol{\beta}^c$ are combined and FDR-controlled.
 
@@ -73,13 +73,13 @@ The discrete part models dropout frequency; the continuous part models positive 
 
 For a KEGG gene set $\mathcal{M}$, per-cell activity is scored as the mean expression of the module minus a matched background — control genes $\mathcal{C}_b$ drawn from $B$ expression bins:
 
-$$s_i^{(\mathcal{M})} = \frac{1}{|\mathcal{M}|}\sum_{g \in \mathcal{M}} \tilde{x}_{ig} \;-\; \frac{1}{B}\sum_{b=1}^{B} \frac{1}{|\mathcal{C}_b|}\sum_{g \in \mathcal{C}_b} \tilde{x}_{ig}.$$
+$$s_i^{(\mathcal{M})} = \frac{1}{|\mathcal{M}|}\sum_{g \in \mathcal{M}} \tilde{x}_{ig} \ -\  \frac{1}{B}\sum_{b=1}^{B} \frac{1}{|\mathcal{C}_b|}\sum_{g \in \mathcal{C}_b} \tilde{x}_{ig}.$$
 
 ### 6. Trajectory Inference
 
 Pseudotime is assigned by embedding cells into a principal graph on the UMAP manifold (reversed graph embedding) and projecting each cell to its nearest graph point; pseudotime is the geodesic distance to the chosen root:
 
-$$\tau(i) = d_{\mathcal{G}}\!\left(\operatorname{proj}_{\mathcal{G}}(\mathbf{u}_i),\ \text{root}\right).$$
+$$\tau(i) = d_{\mathcal{G}}\left(\mathrm{proj}_{\mathcal{G}}(\mathbf{u}_i),\ \text{root}\right).$$
 
 ### 7. The Prognostic Ratio
 
