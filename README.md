@@ -4,11 +4,14 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![R](https://img.shields.io/badge/R-%3E%3D4.2.0-blue)](https://www.r-project.org/)
 
-This repository contains the analysis code for the paper **"Deciphering Abnormal Platelet Subpopulations in COVID-19, Sepsis, and Systemic Lupus Erythematosus through Machine Learning and Single-Cell Transcriptomics"** (Qiu et al., 2024, International Journal of Molecular Sciences).
+This repository contains the analysis code for the paper **"Deciphering Abnormal Platelet Subpopulations in COVID-19, Sepsis, and Systemic Lupus Erythematosus through Machine Learning and Single-Cell Transcriptomics"** (Qiu et al., 2024, *International Journal of Molecular Sciences*).
+
+The computational core of the study: integrate **12 public scRNA-seq cohorts** into a batch-corrected atlas, model platelet state heterogeneity probabilistically, and cast clinical outcome prediction as a **supervised learning problem** solved with gradient boosting and deep neural networks.
 
 ## Overview
 
 ![Platelet Subpopulations](PlateletSubpop-ML-ScTranscriptomics-overview.jpeg)
+
 ### Key Findings
 
 - **Platelet to T Cell Ratio as a Prognostic Biomarker**: The proportion of platelets to T cells in peripheral blood mononuclear cells (PBMC) was identified as the most potent predictor for distinguishing survivors from fatal patients.
@@ -19,6 +22,103 @@ This repository contains the analysis code for the paper **"Deciphering Abnormal
   - Increased platelet aggregation with monocytes
   - Platelets amplify endothelial dysfunction
   - Reduction in lymphocyte activation and differentiation
+
+---
+
+## Mathematical Methods
+
+### 1. Multi-Cohort Integration via Harmony
+
+Twelve datasets introduce severe batch effects. Let $\mathbf{z}_i \in \mathbb{R}^{d}$ be the PCA embedding of cell $i$ and $\phi_i$ its one-hot batch indicator. Harmony alternates between **soft $k$-means clustering** and **mixture-of-experts batch correction**. Cells are assigned to centroids $\{Y_k\}$ with responsibility
+
+$$R_{ki} = \frac{\exp\!\left(-d(\mathbf{z}_i, Y_k)/\sigma\right)}{\sum_{k'}\exp\!\left(-d(\mathbf{z}_i, Y_{k'})/\sigma\right)},$$
+
+and each centroid learns a batch-specific correction $W_k \in \mathbb{R}^{B \times d}$ by ridge regression of $\mathbf{z}_i - Y_k$ onto $\phi_i$ with penalty $\lambda \lVert W_k\rVert^2$. The diversity objective penalizes batch-poor clusters,
+
+$$\max_{\theta}\ \sum_{i,k} R_{ki}\, \phi_i^{\top} \theta_k \quad \text{s.t. cluster entropy regularization},$$
+
+yielding corrected embeddings $\hat{\mathbf{z}}_i = \mathbf{z}_i - \sum_k R_{ki}\, \phi_i^{\top} W_k$ in which biological, not technical, variation dominates.
+
+### 2. Outcome Prediction with XGBoost
+
+Prediction of patient outcome (survivor vs. fatal) is posed as additive function estimation $\hat{y}_i = \sum_{t=1}^{T} f_t(\mathbf{x}_i)$, $f_t \in \mathcal{F}$ (CART space), minimizing the regularized objective
+
+$$\mathcal{L} = \sum_{i=1}^{n} \ell\!\left(y_i, \hat{y}_i\right) + \sum_{t=1}^{T} \Omega(f_t), \qquad \Omega(f) = \gamma T + \frac{1}{2}\lambda \lVert \mathbf{w} \rVert^2.$$
+
+Each boosting round optimizes a second-order Taylor approximation with gradient/Hessian statistics $g_i = \partial_{\hat{y}}\ell$, $h_i = \partial^2_{\hat{y}}\ell$:
+
+$$\tilde{\mathcal{L}}^{(t)} \simeq \sum_{i=1}^{n}\left[ g_i f_t(\mathbf{x}_i) + \frac{1}{2} h_i f_t^2(\mathbf{x}_i) \right] + \Omega(f_t).$$
+
+For a leaf $j$ with index set $I_j$, writing $G_j = \sum_{i \in I_j} g_i$ and $H_j = \sum_{i \in I_j} h_i$, the optimal weight and the split gain are closed-form:
+
+$$w_j^{*} = -\frac{G_j}{H_j + \lambda}, \qquad \mathrm{Gain} = \frac{1}{2}\left[ \frac{G_L^2}{H_L + \lambda} + \frac{G_R^2}{H_R + \lambda} - \frac{(G_L + G_R)^2}{H_L + H_R + \lambda} \right] - \gamma.$$
+
+### 3. Deep Neural Network Classifier
+
+For multi-class cell-state classification over $C$ states, an $L$-layer network $\mathbf{h}^{(l)} = \mathrm{ReLU}(\mathbf{W}^{(l)}\mathbf{h}^{(l-1)} + \mathbf{b}^{(l)})$ with softmax output $\hat{p}_{ic} = e^{o_{ic}} / \sum_{c'} e^{o_{ic'}}$ is trained by minimizing the categorical cross-entropy
+
+$$\mathcal{L}_{\mathrm{CE}} = -\frac{1}{n}\sum_{i=1}^{n}\sum_{c=1}^{C} y_{ic} \log \hat{p}_{ic},$$
+
+with gradients $\partial \mathcal{L} / \partial \mathbf{o}_i = \hat{\mathbf{p}}_i - \mathbf{y}_i$ propagated by the chain rule.
+
+### 4. Differential Expression: MAST Hurdle Model
+
+Gene-wise differential expression uses a two-part generalized linear **hurdle model**. For gene $g$ in cell $i$ with (log-transformed) expression $y_{ig}$, let $z_{ig} = \mathbb{1}[y_{ig} > 0]$ indicate detection:
+
+$$\operatorname{logit} P(z_{ig} = 1) = \mathbf{x}_i^{\top}\boldsymbol{\beta}_g^{c}, \qquad y_{ig} \mid (z_{ig} = 1) \sim \mathcal{N}\!\left(\mathbf{x}_i^{\top}\boldsymbol{\beta}_g^{g},\ \sigma_g^2\right).$$
+
+The discrete part models dropout frequency; the continuous part models positive expression level. Wald tests on $\boldsymbol{\beta}^g$ and $\boldsymbol{\beta}^c$ are combined and FDR-controlled.
+
+### 5. Pathway Module Scoring
+
+For a KEGG gene set $\mathcal{M}$, per-cell activity is scored as the mean expression of the module minus a matched background — control genes $\mathcal{C}_b$ drawn from $B$ expression bins:
+
+$$s_i^{(\mathcal{M})} = \frac{1}{|\mathcal{M}|}\sum_{g \in \mathcal{M}} \tilde{x}_{ig} \;-\; \frac{1}{B}\sum_{b=1}^{B} \frac{1}{|\mathcal{C}_b|}\sum_{g \in \mathcal{C}_b} \tilde{x}_{ig}.$$
+
+### 6. Trajectory Inference
+
+Pseudotime is assigned by embedding cells into a principal graph on the UMAP manifold (reversed graph embedding) and projecting each cell to its nearest graph point; pseudotime is the geodesic distance to the chosen root:
+
+$$\tau(i) = d_{\mathcal{G}}\!\left(\operatorname{proj}_{\mathcal{G}}(\mathbf{u}_i),\ \text{root}\right).$$
+
+### 7. The Prognostic Ratio
+
+The headline biomarker is the scalar feature $r = n_{\text{platelet}} / n_{\text{T}}$ computed per patient from PBMC composition — a one-dimensional predictor whose ROC analysis ($\mathrm{AUC} = P(r_{\text{fatal}} > r_{\text{survivor}})$) outperformed high-dimensional transcriptomic signatures.
+
+---
+
+## Results Summary
+
+### Platelet Cluster Distribution by Disease Severity
+
+| Cluster | Annotation | Key Characteristics |
+|---------|------------|---------------------|
+| C0-C2 | Active Coagulation | Elevated in fatal COVID-19 (FT) |
+| C3 | Quiescent | Predominant in healthy controls (HC) |
+| C4 | Hypoxic/Stress | Highly enriched in fatal cases (38.5%) |
+| C5-C6 | Intermediate | Variable across conditions |
+| C11 | Severe/Fatal-specific | 78.4% frequency in fatal COVID-19 |
+
+### Machine Learning Model Performance
+
+| Model | Accuracy | AUC | Application |
+|-------|----------|-----|-------------|
+| XGBoost | ~85% | 0.89 | Outcome prediction (Survivor vs Non-survivor) |
+| DNN | ~83% | 0.87 | Multi-class cell state classification |
+
+### Key Visualizations
+
+| Figure | Description | Script |
+|--------|-------------|--------|
+| Fig 1 | Cell type composition and platelet ratios | `Figure1B-G.R`, `Figure1H.R` |
+| Fig 2 | Differential expression and pathway analysis | `Figure2A.R` - `Figure2D,E.R` |
+| Fig 3 | UMAP clustering visualization | `Figure3A,B.R` |
+| Fig 4 | Platelet subpopulation markers | `Figure4A,B.R` - `Figure4E.R` |
+| Fig 5 | GSVA pathway enrichment | `Figure5A-F.R`, `Figure5G,H.R` |
+| Fig 6 | Trajectory analysis (Monocle3) | `Figure6A,B.R` - `Figure6I.R` |
+| Fig 7 | Cross-disease comparison | `Figure7A,B.R`, `Figure7C,D.R` |
+| Fig 8 | Statistical comparisons | `Figure8.R` |
+| Fig 9 | Module score analysis | `Figure9A.R` - `Figure9F,G.R` |
 
 ## Project Structure
 
@@ -54,39 +154,6 @@ PlateletSubpop-ML-ScTranscriptomics/
 ├── LICENSE
 └── README.md
 ```
-
-## Results Summary
-
-### Platelet Cluster Distribution by Disease Severity
-
-| Cluster | Annotation | Key Characteristics |
-|---------|------------|---------------------|
-| C0-C2 | Active Coagulation | Elevated in fatal COVID-19 (FT) |
-| C3 | Quiescent | Predominant in healthy controls (HC) |
-| C4 | Hypoxic/Stress | Highly enriched in fatal cases (38.5%) |
-| C5-C6 | Intermediate | Variable across conditions |
-| C11 | Severe/Fatal-specific | 78.4% frequency in fatal COVID-19 |
-
-### Machine Learning Model Performance
-
-| Model | Accuracy | AUC | Application |
-|-------|----------|-----|-------------|
-| XGBoost | ~85% | 0.89 | Outcome prediction (Survivor vs Non-survivor) |
-| DNN | ~83% | 0.87 | Multi-class cell state classification |
-
-### Key Visualizations
-
-| Figure | Description | Script |
-|--------|-------------|--------|
-| Fig 1 | Cell type composition and platelet ratios | `Figure1B-G.R`, `Figure1H.R` |
-| Fig 2 | Differential expression and pathway analysis | `Figure2A.R` - `Figure2D,E.R` |
-| Fig 3 | UMAP clustering visualization | `Figure3A,B.R` |
-| Fig 4 | Platelet subpopulation markers | `Figure4A,B.R` - `Figure4E.R` |
-| Fig 5 | GSVA pathway enrichment | `Figure5A-F.R`, `Figure5G,H.R` |
-| Fig 6 | Trajectory analysis (Monocle3) | `Figure6A,B.R` - `Figure6I.R` |
-| Fig 7 | Cross-disease comparison | `Figure7A,B.R`, `Figure7C,D.R` |
-| Fig 8 | Statistical comparisons | `Figure8.R` |
-| Fig 9 | Module score analysis | `Figure9A.R` - `Figure9F,G.R` |
 
 ## Installation
 
